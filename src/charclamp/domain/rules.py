@@ -12,9 +12,10 @@ class RuleError(ValueError):
 
 
 def latest_shift_for_clamp(clamp: Clamp) -> BurnShift | None:
+    """本窑最新登记的一条班次（按主键，与列表筛选、抽屉近班同口径）。"""
     if not clamp.shifts:
         return None
-    return max(clamp.shifts, key=lambda s: s.started_at)
+    return max(clamp.shifts, key=lambda s: s.id)
 
 
 def can_mark_clamp_drawn(clamp: Clamp) -> tuple[bool, str]:

@@ -67,7 +67,7 @@ async def _load_timeline_context(clamp_id: int | None = None) -> dict[str, Any]:
             .order_by(BurnShift.started_at.desc())
         )
         if clamp_id is not None:
-            # 列表：末字扩集；抽屉近班仍按主键 → 三路对不上
+            # 列表与抽屉近班同口径：严格按窑主键过滤，不做末字扩集
             ids = shift_filter_ids_for_list(clamps, clamp_id)
             query = query.where(BurnShift.clamp_id.in_(ids))
         shifts = list((await db.execute(query)).scalars().all())
