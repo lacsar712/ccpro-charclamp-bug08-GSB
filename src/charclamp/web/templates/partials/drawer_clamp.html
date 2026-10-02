@@ -8,7 +8,7 @@
       {{ clamp.site.name }} · {{ clamp.wood_species or '材种未填' }}
       · 当前 <span class="badge badge-{{ clamp.status }}">{{ status_labels.get(clamp.status, clamp.status) }}</span>
     </p>
-    {% if near_shift %}<p class="hint">近班(主键)：{{ near_shift.started_at }} 峰值 {% if near_shift.peak_temp_c is not none %}{{ near_shift.peak_temp_c }}{% else %}空{% endif %}</p>{% endif %}
+    {% if near_shift %}<p class="hint">近班：{{ near_shift.started_at }} 峰值 {% if near_shift.peak_temp_c is not none %}{{ near_shift.peak_temp_c }}{% else %}空{% endif %}</p>{% endif %}
     {% if clamp.notes %}
     <p class="hint">{{ clamp.notes }}</p>
     {% endif %}

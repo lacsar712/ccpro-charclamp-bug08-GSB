@@ -11,8 +11,12 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from charclamp.domain.models import BurnShift, Clamp, User
-from charclamp.domain.rules import RuleError, assert_can_set_clamp_status, can_mark_clamp_drawn
-from charclamp.domain.shift_lookup import latest_shift_by_pk, shift_filter_ids_for_list
+from charclamp.domain.rules import (
+    RuleError,
+    assert_can_set_clamp_status,
+    can_mark_clamp_drawn,
+    latest_shift_for_clamp,
+)
 from charclamp.infra.db import SessionLocal
 from charclamp.infra.security import verify_password
 
@@ -67,9 +71,8 @@ async def _load_timeline_context(clamp_id: int | None = None) -> dict[str, Any]:
             .order_by(BurnShift.started_at.desc())
         )
         if clamp_id is not None:
-            # 列表：末字扩集；抽屉近班仍按主键 → 三路对不上
-            ids = shift_filter_ids_for_list(clamps, clamp_id)
-            query = query.where(BurnShift.clamp_id.in_(ids))
+            # 按窑主键过滤；不得按窑号（如末字）扩集，否则末字相同的别的窑会串进来
+            query = query.where(BurnShift.clamp_id == clamp_id)
         shifts = list((await db.execute(query)).scalars().all())
         site_name = clamps[0].site.name if clamps else "乌石岗焖烧坞"
     return {
@@ -181,7 +184,7 @@ class TimelineController(Controller):
             if not clamp:
                 return Redirect("/")
         can_drawn, drawn_msg = can_mark_clamp_drawn(clamp)
-        near = latest_shift_by_pk(clamp)
+        near = latest_shift_for_clamp(clamp)
         return Template(
             template_name="partials/drawer_clamp.html",
             context={
